@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") //Apenas para calar a boca do prisma
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+
+  teamID String?
+  team   Team?   @relation(fields: [teamID], references: [id])
+
+  tasks Task[]
+
+  role UserRole @default(user)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Team {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+
+  users User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("teams")
+}
+
+enum TaskPriority {
+  Baixa
+  Media
+  Alta
+}
+
+enum TaskStatus {
+  Pendente
+  Andamento
+  Concluida
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus   @default(Pendente)
+  priority    TaskPriority
+
+  userID String
+  user   User   @relation(fields: [userID], references: [id])
+
+  tasklogs TaskLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tasks")
+}
+
+model TaskLog {
+  id          String     @id @default(uuid())
+  description TaskStatus
+
+  taskID String
+  task   Task   @relation(fields: [taskID], references: [id])
+
+  @@map("taskLogs")
+}
