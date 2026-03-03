@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../database/prisma";
+import { UserRole } from "../../generated/prisma/enums";
 import { z } from "zod"
 import { hash } from "bcrypt";
 import { AppError } from "../utils/AppError";
@@ -39,6 +40,25 @@ export class UserController {
     }
 
     async put(req: Request, res: Response) {
+
+        const paramsSchema = z.object({
+            id: z.uuid()
+        })
+
+        const bodySchema = z.object({
+            role: z.enum(UserRole).default(UserRole.user),
+            teamID: z.uuid()
+        })
+
+        const { id } = paramsSchema.parse(req.params)
+        const { teamID, role} = bodySchema.parse(req.body)
+
+        const user = await prisma.user.update({
+            data: {teamID, role},
+            where:{id}
+        })
+
+        return res.json(user)
 
     }
 
