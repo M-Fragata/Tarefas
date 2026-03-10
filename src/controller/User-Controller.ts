@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import { prisma } from "../database/prisma";
 import { UserRole } from "../../generated/prisma/enums";
 import { z } from "zod"
-import { hash } from "bcrypt";
+import { hash, compare } from "bcrypt";
 import { AppError } from "../utils/AppError";
+import jwt from "jsonwebtoken"
 
 
 export class UserController {
@@ -35,6 +36,7 @@ export class UserController {
             }
         })
 
+
         return res.status(201).json()
 
     }
@@ -46,15 +48,16 @@ export class UserController {
         })
 
         const bodySchema = z.object({
-            role: z.enum(UserRole).default(UserRole.user),
-            teamID: z.uuid()
+            name: z.string().min(3),
+            email: z.email(),
+            role: z.enum(UserRole).default(UserRole.user)
         })
 
         const { id } = paramsSchema.parse(req.params)
-        const { teamID, role} = bodySchema.parse(req.body)
+        const { name, email, role } = bodySchema.parse(req.body)
 
         const user = await prisma.user.update({
-            data: {teamID, role},
+            data: {name, email, role},
             where:{id}
         })
 
@@ -86,5 +89,44 @@ export class UserController {
 
         return res.status(204).json()
 
+    }
+
+    async login(req: Request, res: Response){
+       
+            
+            const bodySchema = z.object({
+                email: z.email(),
+                password: z.string()
+            })
+
+            const { email, password} = bodySchema.parse(req.body)
+
+            const user = await prisma.user.findUnique({where: {
+                email
+            }})
+
+            if(!user) {
+                throw new AppError("Email ou senha incorretos")
+            }
+
+            const verifyPassword = await compare(password, user.password)
+
+            if(!verifyPassword) {
+                throw new AppError("Email ou senha incorretos")
+            }
+
+            const token = jwt.sign({role: user.role}, process.env.SECRET_KEY!, {
+                subject: user.id,
+                expiresIn: "1d"
+            })
+
+
+            const { password: _, ...userWithoutPassword} = user
+
+            return res.json({
+                userWithoutPassword,
+                token
+            })
+    
     }
 }
