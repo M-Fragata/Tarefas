@@ -13,7 +13,7 @@ export function authenticated(req: Request, res: Response, next: NextFunction) {
 
         const secret = process.env.SECRET_KEY
 
-        const authHeader = req.body.headers
+        const authHeader = req.headers.authorization
 
         if (!authHeader) {
             throw new AppError("JWT token not found", 401)
