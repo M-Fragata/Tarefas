@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { prisma } from "../database/prisma";
 import { AppError } from "../utils/AppError";
 import { z } from "zod"
-import { count } from "node:console";
 
 export class TeamController {
 
@@ -28,7 +27,7 @@ export class TeamController {
 
     async create(req: Request, res: Response) {
         const bodySchema = z.object({
-            name: z.string(),
+            name: z.string().min(5),
             description: z.string()
         })
 
@@ -42,7 +41,6 @@ export class TeamController {
         })
 
         return res.status(201).json()
-
     }
 
     async remove(req: Request, res: Response) {
