@@ -93,12 +93,6 @@ export class TaskController {
 
     async remove(req: Request, res: Response) {
 
-        const roleUser = req.user?.role
-
-        if (roleUser !== "admin") {
-            throw new AppError("Usuário não autorizado", 401)
-        }
-
         const reqParamsSchema = z.object({
             id: z.uuid()
         })
