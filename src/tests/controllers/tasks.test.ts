@@ -1,14 +1,27 @@
 import request from "supertest"
 import { app } from "../../app"
 import { prisma } from "../../database/prisma"
+import { UUID } from "node:crypto"
 
 describe("", () => {
 
     let token: string
     let user: any
-    let id: string
+    let task: any
 
     beforeAll(async () => {
+
+        const task = await prisma.task.findFirst({
+            where: {title: "Tarefa de Teste"}
+        })
+
+        await prisma.taskLog.deleteMany({
+            where: { taskID: task?.id}
+        });
+
+        await prisma.task.deleteMany({
+            where: {id: task?.id}
+        })
 
         //Usuário com role de ADMIN
         const login = await request(app).post("/users/login").send({
@@ -29,24 +42,30 @@ describe("", () => {
     it("Should create a task", async () => {
 
         const response = await request(app)
-        .post("/tasks/")
-        .set("Authorization", `Bearer ${token}`)
-        .send({userID: user.id, ...taskData})
+            .post("/tasks/")
+            .set("Authorization", `Bearer ${token}`)
+            .send({ userID: user.id, ...taskData })
+
+        task = await prisma.task.findFirst({
+            where: {
+                title: "Tarefa de Teste"
+            }
+        })
 
         expect(response.status).toBe(201)
 
-        id = response.body.id
     })
 
     it("shoud update status and priority", async () => {
 
         const response = await request(app)
-        .put(`/tasks/${id}`)
-        .set("Authorization", `Bearer ${token}`)
-        .send({priority: "Media", status: "Andamento"})
+            .put(`/tasks/${task.id}`)
+            .set("Authorization", `Bearer ${token}`)
+            .send({ priority: "Media", status: "Concluida" })
 
         expect(response.status).toBe(200)
 
     })
+
 
 })
