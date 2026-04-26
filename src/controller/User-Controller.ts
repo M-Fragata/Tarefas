@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../database/prisma";
-import { UserRole } from "../../generated/prisma/enums";
+import { UserRole } from "../../generated/prisma";
 import { z } from "zod"
 import { hash, compare } from "bcrypt";
 import { AppError } from "../utils/AppError";
@@ -19,9 +19,9 @@ export class UserController {
     async create(req: Request, res: Response) {
 
         const bodySchema = z.object({
-            name: z.string().min(6),
+            name: z.string().min(3),
             email: z.email(),
-            password: z.string()
+            password: z.string().min(6)
         })
 
         const { name, email, password } = bodySchema.parse(req.body)
@@ -35,7 +35,6 @@ export class UserController {
                 password: passwordHashed
             }
         })
-
 
         return res.status(201).json()
 
