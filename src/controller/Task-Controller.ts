@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../database/prisma";
 import { AppError } from "../utils/AppError";
-import { TaskPriority, TaskStatus } from "../../generated/prisma/enums";
+import { TaskPriority, TaskStatus } from "../../generated/prisma";
 import { z } from "zod"
 
 export class TaskController {
