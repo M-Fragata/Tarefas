@@ -5,11 +5,13 @@ import { TaskPage } from "../pages/TasksPage"
 import { CarenciasPage } from "../pages/CarenciasPage"
 import { TaskDetailPage } from "../pages/TaskDetailPage"
 
+import { LayoutPage } from "../pages/LayoutPage"
+
 
 export function UserRoutes() {
     return (
         <Routes>
-            <Route>
+            <Route path="/" element={<LayoutPage/>}>
                 <Route path="/" element={<MainPage />}></Route>
                 <Route path="/memorando" ></Route>
                 <Route path="/tarefas" element={<TaskPage/>}/>
