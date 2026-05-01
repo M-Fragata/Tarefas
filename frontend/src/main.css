@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  /* Cores Principais */
+  --color-movi-blue: #1EA4D9;
+  --color-movi-cyan: #23B7D9;
+  
+  /* Cores de Status */
+  --color-movi-success: #1FA65A;
+  --color-movi-error: #F23030;
+  
+  /* Cor de Fundo / Administrativa */
+  --color-movi-paper: #F2E2CE;
+  
+  /* Tons Auxiliares para Texto e Contraste */
+  --color-movi-dark-text: #1E293B;
+  --color-movi-white: #FFFFFF;
+
+  --text-font-primary: 'Inter'
+}
+
