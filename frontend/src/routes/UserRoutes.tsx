@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router"
 import { MainPage } from "../pages/MainPage"
 import { TaskPage } from "../pages/TasksPage"
 import { CarenciasPage } from "../pages/CarenciasPage"
-import { TaskDetailPage } from "../pages/TaskDetailPage"
+import { TaskDetailsPage } from "../pages/TaskDetailPage"
 
 import { LayoutPage } from "../pages/LayoutPage"
 
@@ -15,7 +15,7 @@ export function UserRoutes() {
                 <Route path="/" element={<MainPage />}></Route>
                 <Route path="/memorando" ></Route>
                 <Route path="/tarefas" element={<TaskPage/>}/>
-                <Route path="/tarefas/:id" element={<TaskDetailPage/>}/>
+                <Route path="/tarefas/:id" element={<TaskDetailsPage/>}/>
                 <Route path="/carencias" element={<CarenciasPage/>}/>
             </Route>
         </Routes>

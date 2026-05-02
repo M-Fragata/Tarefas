@@ -5,7 +5,14 @@ interface Task {
     servidor: string;
     matricula: string;
     entrada: string;
+    emailEntrada: string;
     saida: string;
+    emailSaida: string;
+    cargo: string;
+    funcao: string;
+    cargaHoraria: string;
+    inicio: string;
+    expedicao: string;
     tipo: string;
     priority: string;
     status: string;
@@ -57,15 +64,16 @@ export function TaskCard({ task, isOwned = false, onAssumirTarefa }: TaskCardPro
 
                 {/* Unidades */}
                 <div className="grid grid-rows-2 gap-4 py-3 border-t border-gray-200">
-                    <div>
+                    <div className='flex flex-col gap-2 border-b border-gray-200'>
                         <p className="text-xs font-semibold text-movi-blue mb-1">
-                            UNIDADE DE SAÍDA
+                            SAÍDA - <span>{task.emailSaida}</span>
                         </p>
                         <p className="text-sm text-gray-700">{task.saida}</p>
+
                     </div>
-                    <div>
+                    <div className='flex flex-col gap-2 '>
                         <p className="text-xs font-semibold text-movi-cyan mb-1">
-                            UNIDADE DE ENTRADA
+                            ENTRADA - <span>{task.emailEntrada}</span>
                         </p>
                         <p className="text-sm text-gray-700">{task.entrada}</p>
                     </div>

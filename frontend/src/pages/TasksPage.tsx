@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from "react-router";
 
-import { ClipboardList, } from 'lucide-react';
+import { ClipboardList, Sparkles, X, Send } from 'lucide-react';
 
 import { StatusCard } from "../components/StatusCard"
 import { TaskCard } from '../components/taskCard';
@@ -11,7 +11,14 @@ interface Task {
     servidor: string;
     matricula: string;
     entrada: string;
+    emailEntrada: string;
     saida: string;
+    emailSaida: string;
+    cargo: string;
+    funcao: string;
+    cargaHoraria: string;
+    inicio: string;
+    expedicao: string;
     tipo: string;
     priority: string;
     status: string;
@@ -115,6 +122,40 @@ export function TaskPage() {
 
     }
 
+    const [isAiInputVisible, setIsAiInputVisible] = useState(false);
+    const [userMessage, setUserMessage] = useState("");
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    async function handleGenerateFromAi() {
+        if (!userMessage.trim()) return;
+
+        setIsProcessing(true);
+        try {
+            const tokenRaw = localStorage.getItem("@educ:token");
+            const token = JSON.parse(tokenRaw || "");
+
+            const response = await fetch("http://localhost:3333/tasks/memorando", {
+                method: "POST",
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ userMessage })
+            });
+
+            if (response.ok) {
+                setUserMessage("");
+                setIsAiInputVisible(false);
+                handleGetTasks()
+                handleMyTasks()
+            }
+        } catch (error) {
+            console.error("Erro ao processar com IA:", error);
+            alert("Erro ao processar o texto do e-mail.");
+        } finally {
+            setIsProcessing(false);
+        }
+    }
 
     useEffect(() => {
         handleGetTasks()
@@ -123,91 +164,133 @@ export function TaskPage() {
 
     return (
         <>
-                {/* Cabeçalho com Cards de Resumo */}
-                <header className="mb-8">
-                    <h2 className="text-3xl font-bold text-movi-dark mb-6">Central de Movimentações</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div onClick={() => setShowMyTasks(false)} className="cursor-pointer">
-                            <StatusCard
-                                title="Tarefas Disponíveis"
-                                value={tasks.length.toString()}
-                                icon={<ClipboardList />}
-                                color="movi-blue"
-                                description="Aguardando atribuição"
-                                active={!showMyTasks}
-                            />
-                        </div>
-                        <div onClick={() => setShowMyTasks(true)} className="cursor-pointer">
-                            <StatusCard
-                                title="Minhas Tarefas"
-                                value={myTasks.length.toString()}
-                                icon={<ClipboardList />}
-                                color="movi-cyan"
-                                description="Tarefas que você está gerenciando"
-                                active={showMyTasks}
-                            />
+            {/* Cabeçalho com Cards de Resumo */}
+            <header className="mb-8">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-3xl font-bold text-movi-dark">Central de Movimentações</h2>
+
+                    {/* Botão Nova Tarefa com IA */}
+                    <button
+                        onClick={() => setIsAiInputVisible(!isAiInputVisible)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${isAiInputVisible
+                            ? "bg-slate-200 text-slate-600"
+                            : "bg-movi-blue text-white shadow-md hover:bg-opacity-90"
+                            }`}
+                    >
+                        {isAiInputVisible ? <X size={18} /> : <Sparkles size={18} />}
+                        {isAiInputVisible ? "Cancelar" : "Nova tarefa com IA"}
+                    </button>
+                </div>
+                {/* Área de Input da IA */}
+                {isAiInputVisible && (
+                    <div className="mb-8 bg-white p-6 rounded-xl border-2 border-movi-blue shadow-lg animate-in slide-in-from-top duration-300">
+                        <label className="block text-movi-dark font-semibold mb-2">
+                            Cole o texto do e-mail recebido abaixo:
+                        </label>
+                        <textarea
+                            value={userMessage}
+                            onChange={(e) => setUserMessage(e.target.value)}
+                            placeholder="Ex: Gostaria de solicitar a movimentação do servidor Matheus Fragata da E.M. Marquês de Maricá para a E.M. Carlos Manoel..."
+                            className="w-full h-32 p-3 border rounded-lg focus:ring-2 focus:ring-movi-blue outline-none resize-none text-slate-600"
+                        />
+                        <div className="flex justify-end mt-4">
+                            <button
+                                onClick={handleGenerateFromAi}
+                                disabled={isProcessing || !userMessage}
+                                className="flex items-center gap-2 bg-movi-cyan text-white px-6 py-2 rounded-lg font-bold disabled:opacity-50"
+                            >
+                                {isProcessing ? (
+                                    <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                                ) : (
+                                    <Send size={18} />
+                                )}
+                                {isProcessing ? "Processando..." : "Gerar Tarefas"}
+                            </button>
                         </div>
                     </div>
-                </header>
-
-                {/* Alternância de Visualização baseada no estado showMyTasks */}
-                {showMyTasks ? (
-                    /* Seção Minhas Tarefas */
-                    <section className="animate-in fade-in duration-500">
-                        <div className="flex items-center gap-3 mb-6">
-                            <h3 className="text-2xl font-bold text-movi-dark">Minhas Tarefas</h3>
-                            <span className="bg-movi-blue text-white text-xs px-2 py-1 rounded-full">
-                                {myTasks.length}
-                            </span>
-                        </div>
-
-                        {myTasks.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {myTasks.map((task) => (
-                                    <>
-                                        <Link key={task.id} to={`/tarefas/${task.id}`}>
-                                            <TaskCard key={task.id} task={task} isOwned={true} onAssumirTarefa={handleAssumirTarefa}
-                                            />
-                                        </Link >
-                                    </>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="bg-white rounded-xl shadow-sm p-12 text-center border-2 border-dashed border-slate-200">
-                                <p className="text-slate-400 text-lg">Você ainda não assumiu nenhuma tarefa.</p>
-                                <p className="text-sm text-slate-300">Vá em "Tarefas Disponíveis" para começar.</p>
-                            </div>
-                        )}
-                    </section>
-                ) : (
-                    /* Seção Tarefas Disponíveis */
-                    <section className="animate-in fade-in duration-500">
-                        <div className="flex items-center gap-3 mb-6">
-                            <h3 className="text-2xl font-bold text-movi-dark">Tarefas Disponíveis</h3>
-                            <span className="bg-movi-cyan text-white text-xs px-2 py-1 rounded-full">
-                                {tasks.length}
-                            </span>
-                        </div>
-
-                        {tasks.length > 0 ? (
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {tasks.map((task) => (
-
-                                    <TaskCard key={task.id} task={task} isOwned={false} onAssumirTarefa={handleAssumirTarefa}
-                                    />
-
-                                ))}
-                            </div>
-
-                        ) : (
-                            <div className="bg-white rounded-xl shadow-sm p-12 text-center border-2 border-dashed border-slate-200">
-                                <p className="text-slate-400 text-lg">Nenhuma tarefa disponível no momento.</p>
-                                <p className="text-sm text-slate-300">O sistema está atualizado com o e-Cidade.</p>
-                            </div>
-                        )}
-                    </section>
                 )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div onClick={() => setShowMyTasks(false)} className="cursor-pointer">
+                        <StatusCard
+                            title="Tarefas Disponíveis"
+                            value={tasks.length.toString()}
+                            icon={<ClipboardList />}
+                            color="movi-blue"
+                            description="Aguardando atribuição"
+                            active={!showMyTasks}
+                        />
+                    </div>
+                    <div onClick={() => setShowMyTasks(true)} className="cursor-pointer">
+                        <StatusCard
+                            title="Minhas Tarefas"
+                            value={myTasks.length.toString()}
+                            icon={<ClipboardList />}
+                            color="movi-cyan"
+                            description="Tarefas que você está gerenciando"
+                            active={showMyTasks}
+                        />
+                    </div>
+                </div>
+            </header>
+
+            {/* Alternância de Visualização baseada no estado showMyTasks */}
+            {showMyTasks ? (
+                /* Seção Minhas Tarefas */
+                <section className="animate-in fade-in duration-500">
+                    <div className="flex items-center gap-3 mb-6">
+                        <h3 className="text-2xl font-bold text-movi-dark">Minhas Tarefas</h3>
+                        <span className="bg-movi-blue text-white text-xs px-2 py-1 rounded-full">
+                            {myTasks.length}
+                        </span>
+                    </div>
+
+                    {myTasks.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {myTasks.map((task) => (
+                                <>
+                                    <Link key={task.id} to={`/tarefas/${task.id}`}>
+                                        <TaskCard key={task.id} task={task} isOwned={true} onAssumirTarefa={handleAssumirTarefa}
+                                        />
+                                    </Link >
+                                </>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-xl shadow-sm p-12 text-center border-2 border-dashed border-slate-200">
+                            <p className="text-slate-400 text-lg">Você ainda não assumiu nenhuma tarefa.</p>
+                            <p className="text-sm text-slate-300">Vá em "Tarefas Disponíveis" para começar.</p>
+                        </div>
+                    )}
+                </section>
+            ) : (
+                /* Seção Tarefas Disponíveis */
+                <section className="animate-in fade-in duration-500">
+                    <div className="flex items-center gap-3 mb-6">
+                        <h3 className="text-2xl font-bold text-movi-dark">Tarefas Disponíveis</h3>
+                        <span className="bg-movi-cyan text-white text-xs px-2 py-1 rounded-full">
+                            {tasks.length}
+                        </span>
+                    </div>
+
+                    {tasks.length > 0 ? (
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {tasks.map((task) => (
+
+                                <TaskCard key={task.id} task={task} isOwned={false} onAssumirTarefa={handleAssumirTarefa}
+                                />
+
+                            ))}
+                        </div>
+
+                    ) : (
+                        <div className="bg-white rounded-xl shadow-sm p-12 text-center border-2 border-dashed border-slate-200">
+                            <p className="text-slate-400 text-lg">Nenhuma tarefa disponível no momento.</p>
+                            <p className="text-sm text-slate-300">O sistema está atualizado com o e-Cidade.</p>
+                        </div>
+                    )}
+                </section>
+            )}
         </>
     );
 }
