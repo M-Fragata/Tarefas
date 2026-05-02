@@ -1,12 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  provider        = "prisma-client-js"
+  output          = "../generated/prisma"
   previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") //Apenas para calar a boca do prisma
+  //url      = env("DATABASE_URL") //Apenas para calar a boca do prisma
 }
 
 enum UserRole {
@@ -64,17 +64,27 @@ enum TaskType {
 }
 
 model Task {
-  id          String       @id @default(uuid())
+  id String @id @default(uuid())
 
-  servidor    String
-  matricula   Int
-  entrada     String
-  saida       String?
+  servidor     String
+  matricula    Int
+  entrada      String
+  emailEntrada String
+  saida        String?
+  emailSaida   String?
+  cargo        String
+  funcao       String
+  cargaHoraria String
+  inicio       String
+  expedicao    String
+
   tipo        TaskType
   description String?
-  
-  status      TaskStatus   @default(Pendente)
-  priority    TaskPriority
+
+  enviado Boolean @default(false)
+
+  status   TaskStatus   @default(Pendente)
+  priority TaskPriority
 
   userID String?
   user   User?   @relation(fields: [userID], references: [id])
@@ -89,7 +99,7 @@ model Task {
 
 model TaskLog {
   id          String     @id @default(uuid())
-  status TaskStatus
+  status      TaskStatus
   description String?
 
   taskID String
