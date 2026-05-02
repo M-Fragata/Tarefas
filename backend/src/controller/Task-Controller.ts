@@ -31,6 +31,35 @@ export class TaskController {
         return res.json(myTask)
     }
 
+    async taskDetails(req: Request, res: Response){
+        const paramsSchema = z.object({
+            id: z.string()
+        })
+
+        const { id } = paramsSchema.parse(req.params)
+
+        const task = await prisma.task.findUnique({
+            where:{id},
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
+                tasklogs: {
+                    orderBy: {
+                        createdAt: 'desc'
+                    }
+                }
+            }
+        })
+        
+        if(!task) return res.status(404).json({ message: "Tarefa não encontrada" })
+
+        return res.status(200).json(task)
+    }
+
     async create(req: Request, res: Response) {
 
         const bodySchema = z.object({
