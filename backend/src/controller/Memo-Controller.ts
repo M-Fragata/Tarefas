@@ -22,21 +22,33 @@ export class MemoController {
                 - Unidades/Emails: Use ${JSON.stringify(configBase.unidades)} para encontrar os nomes oficiais e e-mails.
                 - Cargos/Funções: Selecione apenas de ${configBase.cargos} e ${configBase.funcoes}.
 
+                REGRAS DE DOCUMENTO:
+    1. isMemorando (boolean): Marque como 'true' se o servidor estiver indo para uma unidade escolar em que não esteja. Marque como 'false' (Encaminhamento) se identificar que o funcionário está alocando mais carga horária em uma unidade que já trabalha.
+    2. isTotal (boolean): Analise se o servidor sairá TOTALMENTE da unidade de origem. 
+   - Se o texto mencionar que o servidor "continuará", "permanecerá", "manterá carga", "lotação parcial", ou algo parecido, na unidade de saída, marque obrigatoriamente como 'false'.
+   - Caso o texto indique uma transferência comum sem menção de permanência, marque como 'true'.
+   - NÃO retorne null para este campo; use o contexto para decidir entre true ou false.
+    
+
                 Retorne um JSON seguindo este contrato:
                 {
                     "servidores": [
                         {
                             "servidor": "NOME COMPLETO",
                             "matricula": "MATRICULA",
-                            "saida": "UNIDADE DE ORIGEM",
-                            "emailSaida": "EMAIL DA UNIDADE DE SAIDA",
+                            "saida": "UNIDADE DE ORIGEM caso seja informado, se não retorne null",
+                            "isTotal": true or false,
+                            "emailSaida": "EMAIL DA UNIDADE DE ORIGEM (SAÍDA) caso a unidade seja informada, se não retorne null",
                             "entrada": "UNIDADE DE DESTINO",
                             "emailEntrada": "EMAIL DA UNIDADE DE DESTINO",
                             "cargo": "CARGO",
                             "funcao": "FUNÇÃO",
                             "cargaHoraria": "ex: 40 HORAS SEMANAIS",
                             "inicio": "DATA DE INICIO",
-                            "expedicao": "${new Date().toLocaleDateString('pt-BR')}"
+                            "expedicao": "${new Date().toLocaleDateString('pt-BR')}",
+                            "isMemorando": ,
+                            "number": ,
+                            "description" (Crie uma descrição curta para a tarefa)
                         }
                     ]
                 }
@@ -70,12 +82,13 @@ export class MemoController {
                     cargaHoraria: servidor.cargaHoraria,
                     inicio: servidor.inicio,
                     expedicao: servidor.expedicao,
-
+                    isMemorando: servidor.isMemorando,
+                    isTotal: servidor.isTotal,
                     // Campos de controle do sistema
                     tipo: "Movimentacao",
                     priority: "Media",
                     status: "Pendente",
-                    enviado: false, // Novo campo do schema
+                    enviado: false,
                     description: `Movimentação de ${servidor.saida} para ${servidor.entrada}. Início em ${servidor.inicio}.`,
                 }))
             });

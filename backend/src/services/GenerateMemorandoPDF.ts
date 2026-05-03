@@ -2,35 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import puppeteer from 'puppeteer';
 
-const __dirname = path.resolve(); 
+const __dirname = path.resolve();
 
-interface Task {
-    id: string;
-    servidor: string;
-    matricula: string;
-    entrada: string;
-    emailEntrada: string;
-    saida: string;
-    emailSaida: string;
-    cargo: string;
-    funcao: string;
-    cargaHoraria: string;
-    inicio: string;
-    expedicao: string;
-    tipo: string;
-    priority: string;
-    status: string;
-    description: string;
-    createdAt: string;
-    user: {
-        name: string;
-    };
-    tasklogs: Array<{
-        id: string;
-        action: string;
-        createdAt: string;
-    }>;
-}
+import { Task } from "../types/Task";
 
 export async function GenerateMemorandoPDF(dados: Task) {
 
@@ -113,8 +87,6 @@ export async function GenerateMemorandoPDF(dados: Task) {
 
     ListaFunc.forEach((servidor, index) => {
 
-        //const tipoDoc = servidor.memorando ? "Memorando" : "Encaminhamento"
-
         memorandoFormat += `
             <div class="container">
                 <div class="header-container">
@@ -132,7 +104,8 @@ export async function GenerateMemorandoPDF(dados: Task) {
                 </div>
 
                 <div class="doc-id">
-                    Memorando Nº ____/2026
+                ${dados.isMemorando ? `Memorando` : `Encaminhamento`}
+                Nº ${dados.number}/2026
                 </div>
 
                 <div class="destino">

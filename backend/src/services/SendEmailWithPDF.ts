@@ -1,33 +1,6 @@
 import nodemailer from 'nodemailer'
 import { GenerateMemorandoPDF } from "./GenerateMemorandoPDF"
-
-interface Task {
-    id: string;
-    servidor: string;
-    matricula: string;
-    entrada: string;
-    emailEntrada: string;
-    saida: string;
-    emailSaida: string;
-    cargo: string;
-    funcao: string;
-    cargaHoraria: string;
-    inicio: string;
-    expedicao: string;
-    tipo: string;
-    priority: string;
-    status: string;
-    description: string;
-    createdAt: string;
-    user: {
-        name: string;
-    };
-    tasklogs: Array<{
-        id: string;
-        action: string;
-        createdAt: string;
-    }>;
-}
+import { Task } from "../types/Task";
 
 type TipoEnvio = 'ENTRADA' | 'SAIDA';
 
@@ -55,27 +28,56 @@ export async function SendEmailWithPDF(dados: Task, tipoEnvio: TipoEnvio) {
             const pdfBuffer = await GenerateMemorandoPDF(dados);
 
             attachment = [{
-                filename: `memo_${dados.servidor}.pdf`,
+                filename: `${dados.isMemorando ? `Memorando_` : `Encaminhamento_`}${dados.servidor}.pdf`,
                 content: pdfBuffer
             }]
-
             cc = ["rheducacao@educ.marica.rj.gov.br", "subensino2025@educ.marica.rj.gov.br"]
             destinatario = dados.emailEntrada;
-            corpoTexto = `
-                <p>Prezados,</p>
+            corpoTexto = `${dados.isMemorando ? `
+            <p>Prezados,</p>
                 <p>Informamos que encaminhamos o(a) funcionário(a) <strong>${dados.servidor}</strong>, 
                 matrícula: <strong>${dados.matricula}</strong>, para atuar nesta unidade escolar 
                 exercendo a função de <strong>${dados.funcao}</strong> a partir do dia <strong>${dados.inicio}</strong>.</p>
                 <p><strong>OBS.:</strong> Segue o memorando em anexo.</p>
+            ` : `
+            <p>Prezados,</p>
+                <p>Informamos que o(a) funcionário(a) <strong>${dados.servidor}</strong>, 
+                matrícula: <strong>${dados.matricula}</strong>, passará a atuar nesta unidade escolar 
+                com carga horária de <strong>${dados.cargaHoraria}</strong> a partir do dia <strong>${dados.inicio}</strong>.</p>
+                <p><strong>OBS.:</strong> Segue o encaminhamento em anexo.</p>
+            `}
+                
             `;
         } else {
-            destinatario = dados.emailSaida;
-            corpoTexto = `
+            if (!dados.emailSaida) return
+            
+            if (!dados.isTotal) {
+                const pdfBuffer = await GenerateMemorandoPDF(dados);
+
+                attachment = [{
+                    filename: `Encaminhamento_ ${dados.servidor}.pdf`,
+                    content: pdfBuffer
+                }]
+                cc = ["rheducacao@educ.marica.rj.gov.br", "subensino2025@educ.marica.rj.gov.br"]
+                destinatario = dados.emailSaida;
+                corpoTexto = `
                 <p>Prezados,</p>
-                <p>Informamos que o(a) funcionário(a) <strong>${dados.servidor}</strong>, 
-                matrícula: <strong>${dados.matricula}</strong>, <strong>NÃO</strong> faz mais parte do 
-                quadro de funcionários desta unidade escolar a partir de <strong>${dados.inicio}</strong>.</p>
-            `;
+                    <p>Informamos que o(a) funcionário(a) <strong>${dados.servidor}</strong>, 
+                    matrícula: <strong>${dados.matricula}</strong>, passará a atuar nesta unidade escolar 
+                    com carga horária de <strong>${dados.cargaHoraria}</strong> a partir do dia <strong>${dados.inicio}</strong>.</p>
+                    <p><strong>OBS.:</strong> Segue o encaminhamento em anexo.</p>`;
+            }
+            else if (dados.isTotal) {
+                destinatario = dados.emailSaida;
+                corpoTexto = `
+                    <p>Prezados,</p>
+                    <p>Informamos que o(a) funcionário(a) <strong>${dados.servidor}</strong>, 
+                    matrícula: <strong>${dados.matricula}</strong>, <strong>NÃO</strong> faz mais parte do 
+                    quadro de funcionários desta unidade escolar a partir de <strong>${dados.inicio}</strong>.</p>
+                `;
+            } else {
+                return
+            }
         }
 
         return await transporter.sendMail({
