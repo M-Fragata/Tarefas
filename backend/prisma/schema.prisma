@@ -71,12 +71,15 @@ model Task {
   entrada      String
   emailEntrada String
   saida        String?
+  isTotal      Boolean?
   emailSaida   String?
   cargo        String
   funcao       String
   cargaHoraria String
   inicio       String
   expedicao    String
+  isMemorando  Boolean
+  number       Int?
 
   tipo        TaskType
   description String?
