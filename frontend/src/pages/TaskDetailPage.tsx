@@ -14,11 +14,12 @@ import {
 interface Task {
     id: string;
     servidor: string;
-    matricula: string;
+    matricula: number;
     entrada: string;
     emailEntrada: string;
-    saida: string;
-    emailSaida: string;
+    saida: string | null;
+    isTotal: boolean | null;
+    emailSaida: string | null;
     cargo: string;
     funcao: string;
     cargaHoraria: string;
@@ -27,8 +28,11 @@ interface Task {
     tipo: string;
     priority: string;
     status: string;
-    description: string;
-    createdAt: string;
+    enviado: boolean;
+    description: string | null;
+    createdAt: Date;
+    isMemorando: boolean;
+    number: number | null;
     user: {
         name: string;
     };
@@ -44,6 +48,9 @@ export function TaskDetailsPage() {
     const navigate = useNavigate();
     const [task, setTask] = useState<Task | null>(null);
     const [loading, setLoading] = useState(true);
+    const [memorandoNumber, setMemorandoNumber] = useState<number | "">("")
+    const [encaminhamentoNumber, setEncaminhamentoNumber] = useState<number | "">("")
+
 
     async function loadTaskData() {
         try {
@@ -75,16 +82,18 @@ export function TaskDetailsPage() {
             if (!tokenRaw) return;
             const token = JSON.parse(tokenRaw);
 
+            if (!memorandoNumber || !encaminhamentoNumber) return alert("Favor informar número de memorando e encaminhamento!")
+
             const response = await fetch("http://localhost:3333/tasks/email", {
                 method: "POST",
                 headers: {
                     "Content-type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify(task)
+                body: JSON.stringify({dados: [task], memorandoNumber, encaminhamentoNumber})
             })
 
-            if(!response.ok) return console.log(response)
+            if (!response.ok) return console.log(response)
 
             alert("Email enviado com sucesso!")
 
@@ -153,7 +162,6 @@ export function TaskDetailsPage() {
                         </div>
 
                         <hr className="my-8 border-slate-100" />
-
                         <div className="space-y-4">
                             <h3 className="flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-wider">
                                 <MapPin size={16} /> Fluxo de Unidades - <span>{task.cargaHoraria}</span>
@@ -171,6 +179,7 @@ export function TaskDetailsPage() {
                                     <p className="text-base font-bold text-gray-700">{task.entrada}</p>
                                 </div>
                             </div>
+                            <div>Obs: {task.description}</div>
                         </div>
                     </section>
 
@@ -213,6 +222,34 @@ export function TaskDetailsPage() {
                         <p className="text-slate-400 text-sm mb-8 leading-relaxed relative z-10">
                             Analisei os dados desta movimentação. Posso gerar o memorando oficial para a prefeitura agora mesmo.
                         </p>
+
+                        {/* Inputs de Numeração */}
+                        <div className="space-y-3 mb-6 bg-white/5 p-4 rounded-xl border border-white/10">
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">
+                                    Próximo Nº Memorando
+                                </label>
+                                <input
+                                    type="number"
+                                    value={memorandoNumber}
+                                    onChange={(e) => setMemorandoNumber(Number(e.target.value))}
+                                    placeholder="Ex: 150"
+                                    className="w-full bg-movi-dark border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:border-movi-cyan outline-none transition-all"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">
+                                    Próximo Nº Encaminhamento
+                                </label>
+                                <input
+                                    type="number"
+                                    value={encaminhamentoNumber}
+                                    onChange={(e) => setEncaminhamentoNumber(Number(e.target.value))}
+                                    placeholder="Ex: 42"
+                                    className="w-full bg-movi-dark border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:border-movi-cyan outline-none transition-all"
+                                />
+                            </div>
+                        </div>
 
                         <div className="space-y-4 relative z-10">
                             <button
