@@ -90,12 +90,36 @@ export function TaskDetailsPage() {
                     "Content-type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({dados: [task], memorandoNumber, encaminhamentoNumber})
+                body: JSON.stringify({ dados: [task], memorandoNumber, encaminhamentoNumber })
             })
 
             if (!response.ok) return console.log(response)
 
             alert("Email enviado com sucesso!")
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async function handleEcidade() {
+
+        const tokenRaw = localStorage.getItem("@educ:token");
+        if (!tokenRaw) return;
+        const token = JSON.parse(tokenRaw);
+
+        try {
+
+            const response = await fetch("http://localhost:3333/ecidade", {
+                method: "POST",
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({dados: task})
+            })
+
+            console.log(response)
 
         } catch (error) {
             console.log(error)
@@ -259,7 +283,9 @@ export function TaskDetailsPage() {
                                 GERAR MEMORANDO
                             </button>
 
-                            <button className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all border border-white/10">
+                            <button
+                                onClick={() => handleEcidade()}
+                                className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all border border-white/10">
                                 <RefreshCw size={18} className="text-movi-cyan" />
                                 Sincronizar e-Cidade
                             </button>
