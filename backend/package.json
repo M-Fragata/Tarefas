@@ -39,6 +39,7 @@
     "@types/pg": "^8.18.0",
     "@types/supertest": "^7.2.0",
     "jest": "^30.3.0",
+    "playwright": "^1.59.1",
     "prisma": "^7.4.2",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.9",
