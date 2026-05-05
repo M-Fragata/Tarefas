@@ -72,6 +72,7 @@ model Task {
   emailEntrada String
   saida        String?
   isTotal      Boolean?
+  carga
   emailSaida   String?
   cargo        String
   funcao       String
