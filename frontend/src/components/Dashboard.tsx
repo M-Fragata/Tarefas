@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react"
+import { DocenteCard } from "./DocenteCard"
 
 export function Dashboard() {
 
-    const [data, setData] = useState({})
+    const [data, setData] = useState<any>({})
+    const [colunasDisciplinas, setColunasDisciplinas] = useState<string[]>([])
+    const [totaisGlobais, setTotaisGlobais] = useState({})
 
     async function handleGetCarencias() {
         try {
@@ -44,6 +47,17 @@ export function Dashboard() {
             // Agora você tem um objeto onde a chave é o ID da escola
             // e o valor são as estatísticas dela
             setData(resultado);
+            const disciplinas = [...new Set(data.map((c: any) => c.disciplina))].sort() as string[]
+
+            setColunasDisciplinas(disciplinas)
+
+            const totaisPorDisciplina = data.reduce((acc: any, curr: any) => {
+                const { disciplina } = curr;
+                acc[disciplina] = (acc[disciplina] || 0) + 1;
+                return acc;
+            }, {});
+
+            setTotaisGlobais(totaisPorDisciplina)
 
         } catch (error) {
             console.log(error)
@@ -54,20 +68,44 @@ export function Dashboard() {
         handleGetCarencias()
     }, [])
 
-    return (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Object.entries(data).map(([id, info]: [string, any]) => (
-            <div key={id} className="bg-white p-4 rounded shadow">
-                <h3 className="font-bold border-b pb-2 mb-2">{info.nome}</h3>
-                {Object.entries(info.disciplinas).map(([disc, total]) => (
-                    <div key={disc} className="flex justify-between text-sm">
-                        <span>{disc}:</span>
-                        <span className="font-semibold">{total as number} tempos</span>
-                    </div>
-                ))}
-                <div className="mt-2 text-right font-bold text-movi-blue">
-                    Total: {info.totalGeral}
+    return (
+        <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <DocenteCard totais={totaisGlobais} />
+
+                {/* Você pode usar o segundo slot para outro resumo, como "Top 5 Escolas com mais carência" */}
+                <div className="bg-white p-5 rounded-xl shadow-md border-l-4 border-movi-blue">
+                    <h3 className="font-bold text-slate-700 mb-4">Resumo da Rede - Maricá</h3>
+                    <p className="text-sm text-slate-500">
+                        Total de tempos em aberto: <span className="font-bold text-movi-blue">{data.length}</span>
+                    </p>
+                    {/* Outras métricas aqui */}
                 </div>
             </div>
-        ))}
-    </div>)
+            <div>
+                <table className="min-w-full bg-white rounded-lg overflow-hidden shadow-sm">
+                    <thead className="bg-slate-100">
+                        <tr>
+                            <th className="p-3 text-left">Unidade Escolar</th>
+                            {colunasDisciplinas.map(disc => (
+                                <th key={disc} className="p-3 text-center">{disc}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Object.entries(data).map(([id, info]: [string, any]) => (
+                            <tr key={id} className="border-t hover:bg-slate-50 transition-colors">
+                                <td className="p-3 font-medium text-slate-700">{info.nome}</td>
+                                {colunasDisciplinas.map(disc => (
+                                    <td key={disc} className={`p-4 text-center text-sm ${info.disciplinas[disc] > 0 ? 'font-bold text-movi-blue' : 'text-slate-300'}`}>
+                                        {info.disciplinas[disc] || 0}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </>
+    )
 }
