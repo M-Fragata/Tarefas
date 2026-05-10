@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { MemberController } from "../controller/Member-Controller"
+import { MemberController } from "../../controller/Member-Controller"
 
-import { authenticated } from "../middleware/authenticated";
-import { authorizated } from "../middleware/authorizated";
+import { authenticated } from "../../middleware/authenticated";
+import { authorizated } from "../../middleware/authorizated";
 
 const memberRoutes = Router()
 

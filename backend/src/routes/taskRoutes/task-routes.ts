@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { TaskController } from "../controller/Task-Controller"
-import { MemoController } from "../controller/Memo-Controller";
-import { GeneratePDFController } from "../controller/GeneratePDF-Controller";
+import { TaskController } from "../../controller/Task-Controller"
+import { MemoController } from "../../controller/Memo-Controller";
+import { GeneratePDFController } from "../../controller/GeneratePDF-Controller";
 
-import { authenticated } from "../middleware/authenticated"
-import { authorizated } from "../middleware/authorizated"
+import { authenticated } from "../../middleware/authenticated"
+import { authorizated } from "../../middleware/authorizated"
 
 const taskRoutes = Router()
 const taskController = new TaskController

@@ -72,7 +72,7 @@ model Task {
   emailEntrada String
   saida        String?
   isTotal      Boolean?
-  carga
+  //carga
   emailSaida   String?
   cargo        String
   funcao       String
@@ -112,4 +112,41 @@ model TaskLog {
   createdAt DateTime @default(now())
 
   @@map("taskLogs")
+}
+
+// Schema para Carências
+
+model Escola {
+  id        Int      @id @default(autoincrement())
+  nome      String   @unique
+  // Relacionamento: Uma escola tem muitas carências
+  carencias CarenciaDocente[]
+  
+  createdAt DateTime @default(now())
+}
+
+model CarenciaDocente {
+  id              String       @id @default(uuid())
+  disciplina      String       // Português, Matemática, etc.
+  turno           String       // Manhã, Tarde
+  diaSemana       Int          
+  horarioTempo    Int          
+  turma           Int?      
+  tipo            TipoCarencia @default(REAL)
+  professorCobertura String?   
+
+  // Chave estrangeira para a Escola
+  escolaId        Int
+  escola          Escola       @relation(fields: [escolaId], references: [id])
+
+  updatedAt       DateTime     @updatedAt
+
+  @@unique([escolaId, disciplina, turno, diaSemana, horarioTempo])
+}
+
+enum TipoCarencia {
+  REAL
+  TEMPORARIA
+  REAL_COBERTA
+  TEMPORARIA_COBERTA
 }

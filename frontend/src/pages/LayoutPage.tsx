@@ -33,7 +33,7 @@ export function LayoutPage() {
     }
 
     return (
-        <div className="min-h-screen bg-movi-paper flex">
+        <div className="min-h-screen  flex min-w-0">
             {/* SIDEBAR REUTILIZÁVEL */}
             <aside className={`bg-movi-blue text-white transition-all duration-300 shadow-xl flex flex-col sticky top-0 h-screen ${isSidebarOpen ? 'w-64' : 'w-20'}`}>
                 <div className="h-20 flex items-center justify-between px-6 border-b border-white/10">
@@ -81,7 +81,7 @@ export function LayoutPage() {
 
             {/* ÁREA DE CONTEÚDO (Onde as páginas aparecem) */}
             <div className="flex-1 flex flex-col">
-                <main className="flex-1 p-8">
+                <main className="flex-1 p-8 bg-movi-paper">
                     <Outlet />
                 </main>
                 

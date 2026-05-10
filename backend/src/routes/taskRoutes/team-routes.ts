@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { TeamController } from "../controller/Team-Controller"
+import { TeamController } from "../../controller/Team-Controller"
 
-import { authenticated } from "../middleware/authenticated"
-import { authorizated } from "../middleware/authorizated"
+import { authenticated } from "../../middleware/authenticated"
+import { authorizated } from "../../middleware/authorizated"
 
 const teamRoutes = Router()
 const teamController = new TeamController

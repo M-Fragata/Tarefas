@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { EcidadeController } from "../controller/EcidadeController";
+import { EcidadeController } from "../../controller/EcidadeController";
 
 const ecidadeRoutes = Router()
 const ecidadeController = new EcidadeController
