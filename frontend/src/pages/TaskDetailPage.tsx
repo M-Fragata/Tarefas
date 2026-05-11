@@ -116,7 +116,7 @@ export function TaskDetailsPage() {
                     "Content-type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({dados: task})
+                body: JSON.stringify({task})
             })
 
             console.log(response)
