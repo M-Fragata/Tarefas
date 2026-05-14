@@ -1,7 +1,6 @@
 import { useState, useEffect, Fragment } from 'react';
-import { MoreVertical, Settings, School } from 'lucide-react';
+import { Settings, ChevronDown, School } from 'lucide-react';
 
-// Constantes baseadas na imagem image_77bb8d.png
 const DIAS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
 const TEMPOS = [1, 2, 3, 4, 5, 6]; // 6 tempos por turno
 
@@ -49,7 +48,6 @@ export function QuadroHorariosPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [slotAtivo, setSlotAtivo] = useState<string | null>(null);
 
-    // Estado para o formulário do modal
     const [formData, setFormData] = useState<AulaData>({
         disciplina: '',
         professorNome: '',
@@ -80,7 +78,7 @@ export function QuadroHorariosPage() {
 
             const data = await response.json();
             setEscolas(data);
-            console.log(data)
+
             if (data.length > 0) {
                 setEscolaSelecionada(data[0].nome)
             }
@@ -185,7 +183,6 @@ export function QuadroHorariosPage() {
                         <h2 className="text-xl font-bold text-gray-700">Quadro de Horários - 1º Turno</h2>
                     </div>
 
-                    {/* Container com Scroll Horizontal */}
                     <div className="flex-1 overflow-x-auto bg-white border border-gray-200 rounded-sm shadow-sm">
                         <table className="table-fixed border-collapse">
                             <thead>
@@ -206,7 +203,7 @@ export function QuadroHorariosPage() {
                                     <Fragment key={dia}>
                                         {TEMPOS.map((tempo, idx) => (
                                             <tr key={`${dia}-${tempo}`} className="h-6">
-                                                {/* Coluna Fixa: Dia e Tempo */}
+
                                                 <td className={`border border-gray-300 bg-gray-50 sticky left-0 z-10 text-center ${idx === 0 ? 'bg-gray-100' : ''}`}>
                                                     <div className="text-[10px] font-bold text-gray-700">{dia}</div>
                                                 </td>
@@ -214,7 +211,7 @@ export function QuadroHorariosPage() {
                                                     <div className="text-[9px] text-gray-500">{tempo}º</div>
                                                 </td>
 
-                                                {/* Colunas de Turmas (Células de Aula) */}
+
                                                 {TurmasManha.map((turma) => {
                                                     const slotKey = `${turma.id}-${dia}-${tempo}`;
                                                     const aula = gradeHoraria[slotKey];
@@ -235,25 +232,28 @@ export function QuadroHorariosPage() {
                                                                             ) : aula.professorNome}
                                                                         </div>
                                                                     </div>
-                                                                    {/* Ícone de edição que aparece no hover */}
+
                                                                     <button
-                                                                        onClick={() => openModal(slotKey)} className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer p-1">
-                                                                        <Settings size={12} className="text-gray-400 hover:text-blue-600" />
+                                                                        onClick={() => openModal(slotKey)} className="cursor-pointer p-1 ">
+                                                                        <ChevronDown size={12} className="text-gray-400 hover:text-blue-600" />
                                                                     </button>
                                                                 </div>
                                                             ) : (
-                                                                // Botão de Alocar quando vazio
-                                                                <button onClick={() => openModal(slotKey)} className="w-full h-full opacity-0 cursor-pointer group-hover:opacity-100 bg-blue-50 text-blue-600 text-[10px] font-bold">
-                                                                    + CONFIGURAR
-                                                                </button>
+
+                                                                <div className="flex justify-end mr-2">
+                                                                    <button
+                                                                        onClick={() => openModal(slotKey)} className="cursor-pointer p-1">
+                                                                        <ChevronDown size={12} className="text-gray-400 hover:text-blue-600" />
+                                                                    </button>
+                                                                </div>
                                                             )}
                                                         </td>
                                                     );
-                                                })} {/* Fim do TurmasManha.map das células */}
+                                                })}
                                             </tr>
-                                        ))} {/* Fim do TEMPOS.map */}
+                                        ))}
 
-                                        {/* Espaçador entre dias */}
+
                                         <tr className="h-2 bg-gray-100">
                                             <td className="border border-gray-300 sticky left-0 z-10 bg-gray-100"></td>
                                             <td className="border border-gray-300 sticky left-0 z-10 bg-gray-100"></td>
@@ -262,7 +262,7 @@ export function QuadroHorariosPage() {
                                             ))}
                                         </tr>
                                     </Fragment>
-                                ))} {/* Fim do DIAS.map */}
+                                ))}
                             </tbody>
                         </table>
                     </div>
@@ -272,11 +272,11 @@ export function QuadroHorariosPage() {
                         <h2 className="text-xl font-bold text-gray-700">Quadro de Horários - 2º Turno</h2>
                     </div>
 
-                    {/* Container com Scroll Horizontal */}
+
                     <div className="flex-1 overflow-x-auto bg-white border border-gray-200 rounded-sm shadow-sm">
                         <table className="table-fixed border-collapse">
                             <thead>
-                                {/* Cabeçalho de Turmas */}
+
                                 <tr className="bg-gray-100">
                                     <th className="min-w-8 border border-gray-300 border-r-gray-100 sticky left-0 z-10 bg-gray-100"></th>
                                     <th className="min-w-6 border border-gray-300 sticky left-0 z-10 bg-gray-100"></th>
@@ -293,7 +293,7 @@ export function QuadroHorariosPage() {
                                     <Fragment key={dia}>
                                         {TEMPOS.map((tempo, idx) => (
                                             <tr key={`${dia}-${tempo}`} className="h-6">
-                                                {/* Coluna Fixa: Dia e Tempo */}
+
                                                 <td className={`border border-gray-300 bg-gray-50 sticky left-0 z-10 text-center ${idx === 0 ? 'bg-gray-100' : ''}`}>
                                                     <div className="text-[10px] font-bold text-gray-700">{dia}</div>
                                                 </td>
@@ -301,7 +301,6 @@ export function QuadroHorariosPage() {
                                                     <div className="text-[9px] text-gray-500">{tempo}º</div>
                                                 </td>
 
-                                                {/* Colunas de Turmas (Células de Aula) */}
                                                 {TurmasTarde.map((turma) => {
                                                     const slotKey = `${turma.id}-${dia}-${tempo}`;
                                                     const aula = gradeHoraria[slotKey];
@@ -322,26 +321,28 @@ export function QuadroHorariosPage() {
                                                                             ) : aula.professorNome}
                                                                         </div>
                                                                     </div>
-                                                                    {/* Ícone de edição que aparece no hover */}
+
                                                                     <button
                                                                         onClick={() => openModal(slotKey)}
                                                                         className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer p-1">
-                                                                        <Settings size={12} className="text-gray-400 hover:text-blue-600" />
+                                                                        <ChevronDown size={12} className="text-gray-400 hover:text-blue-600" />
                                                                     </button>
                                                                 </div>
                                                             ) : (
-                                                                // Botão de Alocar quando vazio
-                                                                <button onClick={() => openModal(slotKey)} className="w-full h-full opacity-0 cursor-pointer group-hover:opacity-100 bg-blue-50 text-blue-600 text-[10px] font-bold">
-                                                                    + CONFIGURAR
-                                                                </button>
+                                                                <div className="flex justify-end mr-2">
+                                                                    <button
+                                                                        onClick={() => openModal(slotKey)} className="cursor-pointer p-1">
+                                                                        <ChevronDown size={12} className="text-gray-400 hover:text-blue-600" />
+                                                                    </button>
+                                                                </div>
                                                             )}
                                                         </td>
                                                     );
-                                                })} {/* Fim do TurmasManha.map das células */}
+                                                })}
                                             </tr>
-                                        ))} {/* Fim do TEMPOS.map */}
+                                        ))}
 
-                                        {/* Espaçador entre dias */}
+
                                         <tr className="h-2 bg-gray-100">
                                             <td className="border border-gray-300 sticky left-0 z-10 bg-gray-100"></td>
                                             <td className="border border-gray-300 sticky left-0 z-10 bg-gray-100"></td>
@@ -350,7 +351,7 @@ export function QuadroHorariosPage() {
                                             ))}
                                         </tr>
                                     </Fragment>
-                                ))} {/* Fim do DIAS.map */}
+                                ))}
                             </tbody>
                         </table>
                     </div>
