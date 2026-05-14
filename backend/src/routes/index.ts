@@ -6,6 +6,7 @@ import { memberRoutes } from "./taskRoutes/member-routes"
 import { ecidadeRoutes } from "./taskRoutes/ecidade-routes"
 
 import { carenciaRoutes } from "./carenciaRoutes/carencia-routes"
+import { schoolsRoutes } from "./schools/schools-routes"
 
 const routes = Router()
 
@@ -18,6 +19,7 @@ routes.use("/ecidade", ecidadeRoutes)
 
 //Carencias
 routes.use("/carencias", carenciaRoutes)
+routes.use("/schools", schoolsRoutes)
 
 
 export { routes }
