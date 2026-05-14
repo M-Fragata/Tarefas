@@ -3,12 +3,12 @@ import { z } from 'zod'
 import { TimetableCardSkeleton } from './TimetableCardSkeleton';
 
 interface UnidadesProps {
-    id: number; 
+    id: number;
     nome: string;
     createdAt: string;
 }
 
-interface TimetableCardProps {  
+interface TimetableCardProps {
     turno: 'Manhã' | 'Tarde';
     disciplina: string;
     unidades: UnidadesProps[];
