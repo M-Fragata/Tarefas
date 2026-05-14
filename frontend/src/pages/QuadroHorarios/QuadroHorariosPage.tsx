@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment} from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { MoreVertical } from 'lucide-react';
 
 // Constantes baseadas na imagem image_77bb8d.png
@@ -66,8 +66,8 @@ export function QuadroHorariosPage() {
                         <thead>
                             {/* Cabeçalho de Turmas */}
                             <tr className="bg-gray-100">
-                                <th className="w-16 border border-gray-300 border-r-gray-100 sticky left-0 z-10 bg-gray-100"></th>
-                                <th className="w-30 border border-gray-300 sticky left-0 z-10 bg-gray-100"></th>
+                                <th className="min-w-8 border border-gray-300 border-r-gray-100 sticky left-0 z-10 bg-gray-100"></th>
+                                <th className="min-w-6 border border-gray-300 sticky left-0 z-10 bg-gray-100"></th>
                                 {TurmasManha.map((turma) => (
                                     <th key={turma.id} className="w-40 border border-gray-300 p-1 text-center">
                                         <div className="text-xs font-bold text-gray-600">{turma.codigo}</div>
@@ -135,8 +135,8 @@ export function QuadroHorariosPage() {
                         <thead>
                             {/* Cabeçalho de Turmas */}
                             <tr className="bg-gray-100">
-                                <th className="w-16 border border-gray-300 border-r-gray-100 sticky left-0 z-10 bg-gray-100"></th>
-                                <th className="w-30 border border-gray-300 sticky left-0 z-10 bg-gray-100"></th>
+                                <th className="min-w-8 border border-gray-300 border-r-gray-100 sticky left-0 z-10 bg-gray-100"></th>
+                                <th className="min-w-6 border border-gray-300 sticky left-0 z-10 bg-gray-100"></th>
                                 {TurmasTarde.map((turma) => (
                                     <th key={turma.id} className="w-40 border border-gray-300 p-1 text-center">
                                         <div className="text-xs font-bold text-gray-600">{turma.codigo}</div>
