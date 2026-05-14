@@ -119,29 +119,110 @@ model TaskLog {
 model Escola {
   id        Int      @id @default(autoincrement())
   nome      String   @unique
-  // Relacionamento: Uma escola tem muitas carências
+  
+  turmas    Turma[]
   carencias CarenciaDocente[]
   
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("escolas")
+}
+
+model Turma {
+  id            String         @id @default(uuid())
+  escolaId      Int            @map("escola_id")
+  escola        Escola         @relation(fields: [escolaId], references: [id])
+  codigoTurma   String         @map("codigo_turma")
+  idEcidade     Int?           @unique @map("id_ecidade")
+  turno         Turno
+  gradeHorarios GradeHorario[]
+
+  @@map("turmas")
+}
+
+model Disciplina {
+  id            String         @id @default(uuid())
+  sigla         String         @unique 
+  nomeCompleto  String?        @map("nome_completo")
+  corHex        String         @map("cor_hex")
+  gradeHorarios GradeHorario[]
+  professores   Professor[]
+
+  @@map("disciplinas")
+}
+
+model Professor {
+  matricula     String         @id
+  nome          String
+  cargaHoraria  Int
+  disciplinaId  String         @map("disciplina_id")
+  disciplina    Disciplina     @relation(fields: [disciplinaId], references: [id])
+  gradeHorarios GradeHorario[]
+
+  @@map("professores")
+}
+
+model GradeHorario {
+  id                 String      @id @default(uuid())
+  turmaId            String      @map("turma_id")
+  turma              Turma       @relation(fields: [turmaId], references: [id])
+  
+  professorMatricula String?     @map("professor_matricula")
+  professor          Professor?  @relation(fields: [professorMatricula], references: [matricula])
+  
+  disciplinaId       String      @map("disciplina_id")
+  disciplina         Disciplina  @relation(fields: [disciplinaId], references: [id])
+
+  diaSemana          DiaSemana   @map("dia_semana")
+  tempo              Int         
+  tipoVinculo        TipoVinculo @default(PRINCIPAL) @map("tipo_vinculo")
+  
+  atualizadoEm       DateTime    @updatedAt @map("atualizado_em")
+
+  @@map("grade_horario")
 }
 
 model CarenciaDocente {
-  id              String       @id @default(uuid())
-  disciplina      String       // Português, Matemática, etc.
-  turno           String       // Manhã, Tarde
-  diaSemana       Int          
-  horarioTempo    Int          
-  turma           Int?      
-  tipo            TipoCarencia @default(REAL)
-  professorCobertura String?   
+  id                 String       @id @default(uuid())
+  escolaId           Int          @map("escola_id")
+  escola             Escola       @relation(fields: [escolaId], references: [id])
+  
+  disciplina         String
+  turno              String
+  diaSemana          Int
+  horarioTempo       Int
+  turma              Int?
+  tipo               TipoCarencia @default(REAL)
+  professorCobertura String?
 
-  // Chave estrangeira para a Escola
-  escolaId        Int
-  escola          Escola       @relation(fields: [escolaId], references: [id])
-
-  updatedAt       DateTime     @updatedAt
+  updatedAt          DateTime     @updatedAt @map("updated_at")
 
   @@unique([escolaId, disciplina, turno, diaSemana, horarioTempo])
+  @@map("carencias_docentes")
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum Turno {
+  MANHA
+  TARDE
+  NOITE
+}
+
+enum DiaSemana {
+  SEG
+  TER
+  QUA
+  QUI
+  SEX
+}
+
+enum TipoVinculo {
+  PRINCIPAL
+  SUBSTITUTO
+  CARENCIA
 }
 
 enum TipoCarencia {
