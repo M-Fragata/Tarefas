@@ -58,11 +58,16 @@ export function LayoutPage() {
                     />
                     <MenuItem 
                         icon={<Users size={20} />} 
-                        text="Carências" 
-                        to="/carencias" 
-                        active={location.pathname === "/carencias"} 
+                        text="Quadros" 
+                        to="/quadro/:id" 
+                        active={location.pathname.includes("/quadro/")} 
                     />
-                    <MenuItem icon={<History size={20} />} text="Movimentações" to="/movimentacoes" active={false} />
+                    <MenuItem 
+                        icon={<History size={20} />} 
+                        text="Movimentações" 
+                        to="/movimentacoes" 
+                        active={false} 
+                    />
                     <MenuItem icon={<FileUp size={20} />} text="Importar" to="/importar" active={false} />
                     <MenuItem icon={<FileText size={20} />} text="Memorandos" to="/memorandos" active={false} />
                 </nav>
