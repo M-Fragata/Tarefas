@@ -2,9 +2,7 @@ import { useState, useEffect } from "react";
 
 import { StatusCard } from "../components/StatusCard"
 
-import {
-    ClipboardList, AlertCircle, History, FileText
-} from 'lucide-react';
+import { ClipboardList } from 'lucide-react';
 
 export function MainPage() {
 
