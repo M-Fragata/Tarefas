@@ -30,6 +30,10 @@ export class SchoolsController {
             include: { professor: true, disciplina: true, substituto: true }
         })
 
+        const turmas = await prisma.turma.findMany({
+            where: { escolaId: Number(id) }
+        })
+
         const data = aulas.reduce((acc: Record<string, any>, aula) => {
             const key = `${aula.turmaId}-${aula.diaSemana}-${aula.tempo}`;
             acc[key] = {
@@ -42,7 +46,7 @@ export class SchoolsController {
             return acc;
         }, {})
 
-        return res.status(200).json(data)
+        return res.status(200).json({data, turmas})
     }
 
 }
