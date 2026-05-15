@@ -19,7 +19,7 @@ export function UserRoutes() {
                 <Route path="/tarefas" element={<TaskPage/>}/>
                 <Route path="/tarefas/:id" element={<TaskDetailsPage/>}/>
                 <Route path="/carencias" element={<CarenciasPage/>}/>
-                <Route path="/quadro/:id" element={<QuadroHorariosPage/>}/>
+                <Route path="/quadro/" element={<QuadroHorariosPage/>}/>
             </Route>
         </Routes>
     )
