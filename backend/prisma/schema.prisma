@@ -221,6 +221,7 @@ enum Turno {
   MANHA
   TARDE
   NOITE
+  INTEGRAL
 }
 
 enum DiaSemana {
