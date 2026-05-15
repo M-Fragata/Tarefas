@@ -59,7 +59,7 @@ export function LayoutPage() {
                     <MenuItem 
                         icon={<Users size={20} />} 
                         text="Quadros" 
-                        to="/quadro/:id" 
+                        to="/quadro" 
                         active={location.pathname.includes("/quadro/")} 
                     />
                     <MenuItem 
