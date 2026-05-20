@@ -11,8 +11,8 @@ export async function SendEmailWithPDF(dados: Task, tipoEnvio: TipoEnvio) {
             port: 587,
             secure: false,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
+                user: process.env.EMAIL_PROD_USER,
+                pass: process.env.EMAIL_PROD_PASS
             }
         })
 
@@ -21,7 +21,7 @@ export async function SendEmailWithPDF(dados: Task, tipoEnvio: TipoEnvio) {
         let destinatario = ""
         let corpoTexto = ""
 
-        const destinatarioTeste = "matheus.moraes@educ.marica.rj.gov.br"
+        //const destinatarioTeste = "matheus.moraes@educ.marica.rj.gov.br"
 
         if (tipoEnvio === 'ENTRADA') {
 
@@ -31,7 +31,7 @@ export async function SendEmailWithPDF(dados: Task, tipoEnvio: TipoEnvio) {
                 filename: `${dados.isMemorando ? `Memorando_` : `Encaminhamento_`}${dados.servidor}.pdf`,
                 content: pdfBuffer
             }]
-            cc = ["rheducacao@educ.marica.rj.gov.br", "subensino2025@educ.marica.rj.gov.br"]
+            cc = dados.copiaPara? dados.copiaPara : []
             destinatario = dados.emailEntrada;
             corpoTexto = `${dados.isMemorando ? `
             <p>Prezados,</p>
@@ -58,7 +58,7 @@ export async function SendEmailWithPDF(dados: Task, tipoEnvio: TipoEnvio) {
                     filename: `Encaminhamento_ ${dados.servidor}.pdf`,
                     content: pdfBuffer
                 }]
-                cc = ["rheducacao@educ.marica.rj.gov.br", "subensino2025@educ.marica.rj.gov.br"]
+                cc = dados.copiaPara? dados.copiaPara : []
                 destinatario = dados.emailSaida;
                 corpoTexto = `
                 <p>Prezados,</p>
@@ -81,9 +81,9 @@ export async function SendEmailWithPDF(dados: Task, tipoEnvio: TipoEnvio) {
         }
 
         return await transporter.sendMail({
-            from: `"Movimentação Institucional" <${process.env.EMAIL_USER}>`,
-            to: destinatarioTeste,
-            //cc: cc,
+            from: `"Movimentação Institucional" <${process.env.EMAIL_PROD_USER}>`,
+            to: destinatario,
+            cc: cc,
             subject: `Movimentação: ${dados.servidor}`,
             html: corpoTexto,
             attachments: attachment
