@@ -323,6 +323,18 @@
     {
       "nome": "EM DE APLICAÇÃO JOSÉ PEREIRA DA SILVA",
       "email": "emapzezinho@gmail.com"
+    },
+    {
+      "nome": "RH",
+      "email": "rheducacao@educ.marica.rj.gov.br"
+    },
+    {
+      "nome": "NAIEF",
+      "email": "naiefemarica@gmail.com"
+    },
+    {
+      "nome": "ENSINO",
+      "email": "subensino2025@educ.marica.rj.gov.br"
     }
   ],
   "cargos": [
@@ -381,7 +393,6 @@
     "PROF DOCENTE I (CONTRATO)",
     "PROF DOCENTE II",
     "PROF DOCENTE II (CONTRATO)",
-    "PSICOLOGO",
     "PSICOLOGO (CONTRATO)",
     "PSICOPEDAGOGO",
     "SERVENTE",
