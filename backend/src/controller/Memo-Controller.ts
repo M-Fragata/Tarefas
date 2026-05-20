@@ -41,6 +41,7 @@ export class MemoController {
                             "emailSaida": "EMAIL DA UNIDADE DE ORIGEM (SAÍDA) caso a unidade seja informada, se não retorne null",
                             "entrada": "UNIDADE DE DESTINO",
                             "emailEntrada": "EMAIL DA UNIDADE DE DESTINO",
+                            "copiaPara": ["EMAIL1", "EMAIL2"], // Lista de e-mails para cópia, caso seja informado busque pelo nome na ${JSON.stringify(configBase.unidades)} e caso não seja, retorne null
                             "cargo": "CARGO",
                             "funcao": "FUNÇÃO",
                             "cargaHoraria": "ex: 40 HORAS SEMANAIS",
@@ -60,11 +61,10 @@ export class MemoController {
                     responseMimeType: "application/json",
                 }
             });
-
             // 2. Chamada simplificada
             const result = await model.generateContent(prompt);
             const responseText = result.response.text();
-
+            
             const { servidores } = JSON.parse(responseText)
 
             if (!servidores) return res.status(400).json({ error: "Falha na estrutura do JSON retornado." });
@@ -75,6 +75,7 @@ export class MemoController {
                     matricula: parseInt(servidor.matricula, 10),
                     entrada: servidor.entrada,
                     emailEntrada: servidor.emailEntrada,
+                    copiaPara: servidor.copiaPara || [],
                     saida: servidor.saida,
                     emailSaida: servidor.emailSaida,
                     cargo: servidor.cargo,
