@@ -70,6 +70,9 @@ model Task {
   matricula    Int
   entrada      String
   emailEntrada String
+
+  copiaPara    String[]
+
   saida        String?
   isTotal      Boolean?
   //carga
