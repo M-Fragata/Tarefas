@@ -4,6 +4,7 @@ export interface Task {
     matricula: number;
     entrada: string;
     emailEntrada: string;
+    copiaPara: string[] | null;
     saida: string | null;
     isTotal: Boolean | null;
     emailSaida: string | null;
