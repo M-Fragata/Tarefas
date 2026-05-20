@@ -86,7 +86,7 @@ export const Get = {
 
     EncontrarEscola: async (frame: Frame, nomeEscolaAlvo: string) => {
         let escolaProcurada = "";
-        console.log(nomeEscolaAlvo)
+
         if (nomeEscolaAlvo === "JIM JANELINHA DO SABER") {
             escolaProcurada = "JARDIM DE INFÂNCIA MUNICIPAL PROFESSORA ENILZEA SABINO DA COSTA PIRES";
         } else if (nomeEscolaAlvo === "EM ANÍSIO TEIXEIRA") {
@@ -95,35 +95,69 @@ export const Get = {
             escolaProcurada = nomeEscolaAlvo;
         }
 
-        // Normaliza o alvo: remove &nbsp;, múltiplos espaços e coloca em UpperCase
-        const normalizar = (t: string) => t.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+        const normalizar = (t: string) => t
+            .replace(/[\r\n\t]/g, ' ')
+            .replace(/\u00a0/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toUpperCase();
+
         const alvoFormatado = normalizar(escolaProcurada);
 
-        // 1. Tenta buscar todas as linhas que tenham a classe corpo em qualquer nível
         const rows = await frame.locator('tr').filter({ has: frame.locator('td.corpo') }).all();
-        const resultados = [];
 
-        console.log(`🔎 Iniciando busca por: "${alvoFormatado}" em ${rows.length} linhas.`);
+        console.log(`🔎 Iniciando busca e clique por: "${alvoFormatado}"`);
 
         for (const row of rows) {
-            const tdNome = row.locator('td.corpo').first();
-            const nomeRaw = await tdNome.textContent();
+            const cells = await row.locator('td.corpo').all();
 
-            if (nomeRaw) {
-                const nomeLimpo = normalizar(nomeRaw);
+            // Garante que a linha possui pelo menos as 5 colunas (índices 0 a 4)
+            if (cells.length >= 5) {
+                const nomeRaw = await cells[0].textContent();
+                const dataFimRaw = await cells[3].textContent();
 
-                // Log de debug para você ver o que o robô está lendo no e-Cidade
-                if (nomeLimpo.includes(alvoFormatado.substring(0, 10))) {
-                    console.log(`❓ Quase bateu: Sistema["${nomeLimpo}"] vs Alvo["${alvoFormatado}"]`);
-                }
+                if (nomeRaw) {
+                    const nomeLimpo = normalizar(nomeRaw);
+                    const dataFimLimpa = dataFimRaw ? normalizar(dataFimRaw) : "";
 
-                if (nomeLimpo === alvoFormatado) {
-                    resultados.push(row);
+                    // Verifica se o nome bate e se a Data Fim está vazia
+                    if (nomeLimpo.includes(alvoFormatado) && dataFimLimpa === "") {
+                        console.log(`🎯 Registro ativo encontrado para: "${nomeLimpo}"`);
+
+                        // Localiza o primeiro link de alteração dentro do quinto TD (índice 4)
+                        const botaoAlterar = cells[4].locator('a[title="ALTERAR CONTEÚDO DA LINHA"]').first();
+
+                        console.log(`🖱️ Clicando no botão de alteração...`);
+                        await botaoAlterar.click();
+
+                        // Retorna a linha que sofreu a ação caso precise dela nos próximos passos
+                        return [row];
+                    }
                 }
             }
         }
 
-        return resultados;
+        console.log(`❌ Nenhuma escola ativa correspondente foi encontrada.`);
+        return [];
+    },
+
+    FormatarSaida: (data: string) => {
+        // Exemplo se dados.entrada for "20/05/2026"
+        const [dia, mes, ano] = data.split('/').map(Number);
+
+        // O mês no objeto Date do JS começa em 0 (Janeiro = 0, Maio = 4)
+        const dataObjeto = new Date(ano, mes - 1, dia);
+
+        // Subtrai 1 dia
+        dataObjeto.setDate(dataObjeto.getDate() - 1);
+
+        // Formata de volta para DD/MM/YYYY com preenchimento de zeros à esquerda (padStart)
+        const diaSaida = String(dataObjeto.getDate()).padStart(2, '0');
+        const mesSaida = String(dataObjeto.getMonth() + 1).padStart(2, '0');
+        const anoSaida = dataObjeto.getFullYear();
+
+        const dataSaida = `${diaSaida}/${mesSaida}/${anoSaida}`;
+        return dataSaida;
     }
 
 }
