@@ -8,7 +8,8 @@ import {
     FileText,
     Hash,
     MapPin,
-    Clock
+    Clock,
+    Copy
 } from 'lucide-react';
 
 interface Task {
@@ -17,6 +18,7 @@ interface Task {
     matricula: number;
     entrada: string;
     emailEntrada: string;
+    copiaPara: string[] | null;
     saida: string | null;
     isTotal: boolean | null;
     emailSaida: string | null;
@@ -186,6 +188,11 @@ export function TaskDetailsPage() {
                         </div>
 
                         <hr className="my-8 border-slate-100" />
+                        <div className="mb-4 border-b border-slate-100 pb-4">
+                            <p className="text-sm text-movi-dark flex items-center gap-2">
+                                <Copy size={20} className="text-movi-cyan" /> {task.copiaPara?.join(', ') || 'Nenhum e-mail de cópia informado'}
+                            </p>
+                        </div>
                         <div className="space-y-4">
                             <h3 className="flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-wider">
                                 <MapPin size={16} /> Fluxo de Unidades - <span>{task.cargaHoraria}</span>
