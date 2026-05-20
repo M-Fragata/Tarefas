@@ -96,6 +96,12 @@ export async function EcidadeService(dados: Task) {
 
         console.log(linhaEscola)
 
+        const frameDataSaida = await Get.Frame(page, 'input[name="ed75_i_saidaescola"]')
+
+        const dataSaida = dados.entrada - 1
+
+        await frameDataSaida.fill('input[name="ed75_i_saidaescola"]', (dados.inicio).toString())
+
 
     } catch (error) {
         console.error('Erro ao tentar fazer login no e-cidade:', error);
