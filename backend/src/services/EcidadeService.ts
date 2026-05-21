@@ -10,15 +10,10 @@ export async function EcidadeService(dados: Task) {
     const usuario = process.env.ECIDADE_USER
     const senha = process.env.ECIDADE_PASSWORD
 
-    let escola = ""
 
-    if (dados.saida === "JIM PROFESSORA ENILZEA SABINO DA COSTA PIRES") {
-        escola = "JIM JANELINHA DO SABER"
-    } else if (dados.saida === "CEPT Leonel de Moura Brizola") {
-        escola = "EM ANÍSIO TEIXEIRA"
-    } else {
-        escola = dados.saida!
-    }
+    const escolaSaida = await Get.FormatSchollName(dados.saida!)
+    const escolaEntrada = await Get.FormatSchollName(dados.entrada!)
+
 
     try {
         await page.goto('https://ecidade.marica.rj.gov.br/e-cidade/login.php');
@@ -41,67 +36,62 @@ export async function EcidadeService(dados: Task) {
 
         await page.click('#menu_id_1100883')
 
-        await page.click('div[title="Configurações da Janela"]')
+        await Get.AcessScholl(page, escolaSaida)
 
-        // 3. Pequena pausa para garantir que os scripts do Select2 foram anexados ao DOM
-        await page.waitForTimeout(500);
-
-        await page.keyboard.press('Tab')
-        await page.keyboard.press('Space');
-
-        await page.waitForTimeout(500);
-
-        escola?.split("").map(async (e) => {
-            await page.keyboard.press(e)
-        })
-
-        await page.keyboard.press('Enter')
-
-        await page.keyboard.press('Tab')
-        await page.keyboard.press('Tab')
-        await page.keyboard.press('Tab')
-        await page.keyboard.press('Space');
-
-        //erro aqui, tentando pesquisar
         await page.waitForTimeout(1000);
 
-        const frameBotao = await Get.Frame(page, 'input#pesquisar')
-        const botao = frameBotao.locator('input#pesquisar');
-        await botao.click();
-
-        const frameMatricula = await Get.Frame(page, 'input#chave_ed284_i_rhpessoal')
-        await frameMatricula.fill('input#chave_ed284_i_rhpessoal', (dados.matricula).toString())
-
-        const pesquisar = frameMatricula.locator('input#pesquisar2')
-        await pesquisar.click()
+        await Get.InsertMatricula(page, dados.matricula.toString())
 
         const frameFuncaoExercida = await Get.Frame(page, 'input[name="a4"]')
         const botaoFuncaoExercida = frameFuncaoExercida.locator('input[name="a4"]')
+        await page.waitForTimeout(500)
         await botaoFuncaoExercida.click()
 
-        //--------------------
         const frameGrid = await Get.Frame(page, 'table#gridAtividadeProfissionalbody');
         const atividades = await Get.Horario(frameGrid, 'table#gridAtividadeProfissionalbody');
 
         const bloqueado = await Get.HoraExtra(atividades)
 
-        if(bloqueado === true) return
+        if (bloqueado === true) return
 
-        const frameEscolas = await Get.Frame(page, 'input[name="a8"]')
-        const botaoEscolas = frameEscolas.locator('input[name="a8"]')
-        await botaoEscolas.click()
+        await Get.AcessEscolas(page) //Acessa a tela de escolas do E-cidade
 
-        const frameEscola = await Get.Frame(page, 'td.corpo')
-        const linhaEscola = await Get.EncontrarEscola(frameEscola, escola)
+        const saida = await Get.EncontrarEscola(page, escolaSaida)
 
-        console.log(linhaEscola)
+        //----------
+        if (saida.length > 0) {
+            console.log("Passou aqui")
+            const frameDataSaida = await Get.Frame(page, 'input[name="ed75_i_saidaescola"]')
 
-        const frameDataSaida = await Get.Frame(page, 'input[name="ed75_i_saidaescola"]')
+            const dataSaida = Get.FormatarSaida(dados.inicio)
 
-        const dataSaida = dados.entrada - 1
+            await frameDataSaida.locator('input[name="ed75_i_saidaescola"]').click()
+            await frameDataSaida.locator('input[name="ed75_i_saidaescola"]').pressSequentially(dataSaida, { delay: 150 })
 
-        await frameDataSaida.fill('input[name="ed75_i_saidaescola"]', (dados.inicio).toString())
+            await page.waitForTimeout(2000);
 
+            await page.keyboard.press('Enter')
+        }
+
+        await page.waitForTimeout(2000);
+
+        await Get.AcessScholl(page, escolaEntrada)
+
+        await page.waitForTimeout(4000);
+
+        await Get.InsertMatricula(page, dados.matricula.toString())
+        await Get.AcessEscolas(page)
+
+        const entrada = await Get.EncontrarEscola(page, escolaEntrada)
+
+console.log(entrada.length)
+
+        if (entrada.length == 0) {
+            await Get.InsertNewDataIngress(page, dados.inicio)
+            await Get.AcessFuncaoExercida(page)
+        } else {
+            await Get.AcessFuncaoExercida(page)
+        }
 
     } catch (error) {
         console.error('Erro ao tentar fazer login no e-cidade:', error);
