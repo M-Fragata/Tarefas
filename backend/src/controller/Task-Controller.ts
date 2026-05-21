@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { prisma } from "../database/prisma";
-import { AppError } from "../utils/AppError";
 import { TaskPriority, TaskStatus, TaskType } from "../../generated/prisma";
 import { z } from "zod"
 
@@ -11,7 +10,6 @@ export class TaskController {
         const task = await prisma.task.findMany({
             where: { userID: null }
         })
-
         return res.json(task)
 
     }
@@ -31,7 +29,7 @@ export class TaskController {
         return res.json(myTask)
     }
 
-    async taskDetails(req: Request, res: Response){
+    async taskDetails(req: Request, res: Response) {
         const paramsSchema = z.object({
             id: z.string()
         })
@@ -39,7 +37,7 @@ export class TaskController {
         const { id } = paramsSchema.parse(req.params)
 
         const task = await prisma.task.findUnique({
-            where:{id},
+            where: { id },
             include: {
                 user: {
                     select: {
@@ -54,8 +52,8 @@ export class TaskController {
                 }
             }
         })
-        
-        if(!task) return res.status(404).json({ message: "Tarefa não encontrada" })
+
+        if (!task) return res.status(404).json({ message: "Tarefa não encontrada" })
 
         return res.status(200).json(task)
     }
@@ -186,4 +184,5 @@ export class TaskController {
         return res.json(taskLogs)
 
     }
+
 }
