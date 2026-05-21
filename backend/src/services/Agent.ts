@@ -84,14 +84,20 @@ export const Get = {
 
     },
 
-    EncontrarEscola: async (frame: Frame, nomeEscolaAlvo: string) => {
+    EncontrarEscola: async (page: Page, nomeEscolaAlvo: string) => {
+
+        const frame = await Get.Frame(page, 'td.corpo')
+
         let escolaProcurada = "";
 
         if (nomeEscolaAlvo === "JIM JANELINHA DO SABER") {
             escolaProcurada = "JARDIM DE INFÂNCIA MUNICIPAL PROFESSORA ENILZEA SABINO DA COSTA PIRES";
         } else if (nomeEscolaAlvo === "EM ANÍSIO TEIXEIRA") {
             escolaProcurada = "CEPT Leonel de Moura Brizola";
-        } else {
+        } else if (nomeEscolaAlvo === "SEC MUNICIPAL DE EDUCACAO") {
+            escolaProcurada = "SECRETARIA DE EDUCACAO";
+        }
+        else {
             escolaProcurada = nomeEscolaAlvo;
         }
 
@@ -106,8 +112,6 @@ export const Get = {
 
         const rows = await frame.locator('tr').filter({ has: frame.locator('td.corpo') }).all();
 
-        console.log(`🔎 Iniciando busca e clique por: "${alvoFormatado}"`);
-
         for (const row of rows) {
             const cells = await row.locator('td.corpo').all();
 
@@ -121,17 +125,20 @@ export const Get = {
                     const dataFimLimpa = dataFimRaw ? normalizar(dataFimRaw) : "";
 
                     // Verifica se o nome bate e se a Data Fim está vazia
-                    if (nomeLimpo.includes(alvoFormatado) && dataFimLimpa === "") {
-                        console.log(`🎯 Registro ativo encontrado para: "${nomeLimpo}"`);
+                    if (nomeLimpo.includes(alvoFormatado)) {
 
-                        // Localiza o primeiro link de alteração dentro do quinto TD (índice 4)
-                        const botaoAlterar = cells[4].locator('a[title="ALTERAR CONTEÚDO DA LINHA"]').first();
+                        if (!dataFimLimpa) {
 
-                        console.log(`🖱️ Clicando no botão de alteração...`);
-                        await botaoAlterar.click();
+                            // Localiza o primeiro link de alteração dentro do quinto TD (índice 4)
+                            const botaoAlterar = cells[4].locator('a[title="ALTERAR CONTEÚDO DA LINHA"]').first();
 
-                        // Retorna a linha que sofreu a ação caso precise dela nos próximos passos
-                        return [row];
+                            await botaoAlterar.click();
+
+                            // Retorna a linha que sofreu a ação caso precise dela nos próximos passos
+                            return [row];
+                        } else {
+                            console.log(`ℹ️ Linha de "${nomeLimpo}" ignorada pois já possui data fim: ${dataFimLimpa}`)
+                        }
                     }
                 }
             }
@@ -156,8 +163,107 @@ export const Get = {
         const mesSaida = String(dataObjeto.getMonth() + 1).padStart(2, '0');
         const anoSaida = dataObjeto.getFullYear();
 
-        const dataSaida = `${diaSaida}/${mesSaida}/${anoSaida}`;
+        const dataSaida = `${diaSaida}${mesSaida}${anoSaida}`;
         return dataSaida;
+    },
+
+    FormatarEntrada: (data: string) => {
+        // Exemplo se dados.entrada for "20/05/2026"
+        const [dia, mes, ano] = data.split('/').map(Number);
+
+        // O mês no objeto Date do JS começa em 0 (Janeiro = 0, Maio = 4)
+        const dataObjeto = new Date(ano, mes, dia);
+
+        // Subtrai 1 dia
+        dataObjeto.setDate(dataObjeto.getDate());
+
+        // Formata de volta para DD/MM/YYYY com preenchimento de zeros à esquerda (padStart)
+        const diaEntrada = String(dataObjeto.getDate()).padStart(2, '0');
+        const mesEntrada = String(dataObjeto.getMonth() + 1).padStart(2, '0');
+        const anoEntrada = dataObjeto.getFullYear();
+
+        const dataEntrada = `${diaEntrada}${mesEntrada}${anoEntrada}`;
+        return dataEntrada;
+    },
+
+    AcessScholl: async (page: Page, nomeEscolaAlvo: string) => {
+        await page.click('div[title="Configurações da Janela"]')
+
+        // 3. Pequena pausa para garantir que os scripts do Select2 foram anexados ao DOM
+        await page.waitForTimeout(500);
+
+        await page.keyboard.press('Tab')
+        await page.keyboard.press('Space');
+
+        await page.waitForTimeout(500);
+
+        nomeEscolaAlvo?.split("").map(async (e) => {
+            await page.keyboard.press(e)
+        })
+
+        console.log(nomeEscolaAlvo)
+
+        await page.keyboard.press('Enter')
+
+        await page.keyboard.press('Tab')
+        await page.keyboard.press('Tab')
+        await page.keyboard.press('Tab')
+        await page.keyboard.press('Space');
+    },
+
+    FormatSchollName: async (nomeEscolaAlvo: string) => {
+        if (nomeEscolaAlvo === "JIM PROFESSORA ENILZEA SABINO DA COSTA PIRES") {
+            return "JIM JANELINHA DO SABER"
+        } else if (nomeEscolaAlvo === "CEPT Leonel de Moura Brizola") {
+            return "EM ANÍSIO TEIXEIRA"
+        } else if (nomeEscolaAlvo === "Secretaria de Educação") {
+            return "SEC MUNICIPAL DE EDUCACAO"
+        }
+        else {
+            return nomeEscolaAlvo
+        }
+    },
+
+    InsertMatricula: async (page: Page, matricula: string) => {
+
+        // 1. Localiza o frame e clica no botão principal de pesquisar
+        const frameBotao = await Get.Frame(page, 'input#pesquisar');
+        const botao = frameBotao.locator('input#pesquisar');
+        await botao.click();
+
+        // 2. Localiza o frame do campo de matrícula e preenche o valor
+        const frameMatricula = await Get.Frame(page, 'input#chave_ed284_i_rhpessoal');
+        await frameMatricula.fill('input#chave_ed284_i_rhpessoal', matricula);
+
+        // 3. Localiza e clica no botão interno de pesquisar (pesquisar2)
+        const pesquisarInterno = frameMatricula.locator('input#pesquisar2');
+        await pesquisarInterno.click();
+    },
+
+    AcessEscolas: async (page: Page) => {
+        const frameEscolas = await Get.Frame(page, 'input[name="a8"]')
+        const botaoEscolas = frameEscolas.locator('input[name="a8"]')
+        await botaoEscolas.click()
+    },
+    AcessFuncaoExercida: async (page: Page) => {
+        const frameFuncaoExercida = await Get.Frame(page, 'input[name="a4"]')
+        const botaoFuncaoExercida = frameFuncaoExercida.locator('input[name="a4"]')
+        await botaoFuncaoExercida.click()
+    },
+
+    InsertNewDataIngress: async (page: Page, data: any) => {
+
+        const entrada = Get.FormatarEntrada(data)
+
+        const dataIngressoFrame = await Get.Frame(page, 'input#ed75_d_ingresso')
+        const dataIngressoInput = dataIngressoFrame.locator('input#ed75_d_ingresso')
+        await dataIngressoInput.click()
+        await dataIngressoInput.pressSequentially(entrada, { delay: 150 })
+
+
+        await page.waitForTimeout(2000);
+        await page.keyboard.press('Enter')
+
     }
 
 }
