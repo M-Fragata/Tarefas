@@ -4,11 +4,9 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export const Brain = {
-    /**
-     * Analisa o histórico de atividades extraído da grid e decide se a movimentação pode prosseguir.
-     */
+
     analisarHistoricoMovimentacao: async (
-        historicoGrid: any[], 
+        historicoGrid: any[],
         tarefa: any
     ): Promise<{
         podeProsseguir: boolean;
@@ -46,7 +44,7 @@ export const Brain = {
             const model = genAI.getGenerativeModel({
                 model: "gemini-3.5-flash",
                 generationConfig: {
-                    responseMimeType: "application/json", 
+                    responseMimeType: "application/json",
                 }
             });
 
@@ -63,12 +61,61 @@ export const Brain = {
 
         } catch (error) {
             console.error("❌ Erro na análise do cérebro (Gemini):", error);
-            
+
             // Retorno de Fallback de segurança para não deixar seu EcidadeService quebrar
             return {
                 podeProsseguir: false,
                 motivo: "Erro interno de comunicação com o cérebro da IA. Movimentação abortada por segurança."
             };
+        }
+    },
+
+    veririfyProfessorExistInSchool: async (screenshotBuffer: Buffer): Promise<boolean> => {
+        try {
+            console.log("👁️ [CÉREBRO] Analisando imagem da tela de busca com Gemini Vision...");
+
+            // Converte o Buffer do print do Playwright para o formato que a API do Gemini espera
+            const imagemPart = {
+                inlineData: {
+                    data: screenshotBuffer.toString("base64"),
+                    mimeType: "image/png"
+                },
+            };
+
+            const prompt = `
+            Você é o sistema de visão computacional de um robô de automação do e-Cidade.
+            Analise o print anexado da janela "Pesquisa de Recursos Humanos da Escola".
+
+            Sua única tarefa é verificar se o texto "Nenhum Registro Retornado" aparece escrito na tela (geralmente ao lado dos botões Início/Anterior/Próximo/Último).
+
+            Responda EXCLUSIVAMENTE um JSON com a estrutura abaixo:
+            {
+                "erroDetectado": true (se a mensagem "Nenhum Registro Retornado" estiver visível) ou false (se a mensagem NÃO estiver na tela)
+            }
+            `;
+
+            const model = genAI.getGenerativeModel({
+                model: "gemini-2.5-flash",
+                generationConfig: {
+                    responseMimeType: "application/json",
+                }
+            });
+
+            // Passamos o prompt de texto e a imagem juntos
+            const result = await model.generateContent([prompt, imagemPart]);
+            const responseText = result.response.text();
+
+            if (!responseText) throw new Error("Resposta vazia da API de Visão.");
+
+console.log(responseText)
+
+            const resultadoJson = JSON.parse(responseText);
+            return resultadoJson.erroDetectado;
+
+        } catch (error) {
+            console.error("❌ Erro na análise de visão do Gemini:", error);
+            // Fallback de segurança: assume que deu erro para evitar duplicar registros indevidamente
+            return false;
         }
     }
 };
