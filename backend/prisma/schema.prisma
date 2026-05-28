@@ -6,44 +6,172 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  //url      = env("DATABASE_URL") //Apenas para calar a boca do prisma
-}
-
-enum UserRole {
-  user
-  admin
 }
 
 model User {
-  id       String @id @default(uuid())
-  name     String
-  email    String @unique
-  password String
-
-  teamID String?
-  team   Team?   @relation(fields: [teamID], references: [id])
-
-  tasks Task[]
-
-  role UserRole @default(user)
-
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  teamID    String?
+  role      UserRole @default(user)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  tasks     Task[]
+  team      Team?    @relation(fields: [teamID], references: [id])
 
   @@map("users")
 }
 
 model Team {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
   description String?
-
-  users User[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
 
   @@map("teams")
+}
+
+model Task {
+  id           String       @id @default(uuid())
+  description  String?
+  status       TaskStatus   @default(Pendente)
+  priority     TaskPriority
+  userID       String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  entrada      String
+  matricula    Int
+  saida        String?
+  servidor     String
+  tipo         TaskType
+  cargaHoraria String
+  cargo        String
+  emailEntrada String
+  emailSaida   String?
+  enviado      Boolean      @default(false)
+  expedicao    String
+  funcao       String
+  inicio       String
+  isMemorando  Boolean
+  number       Int?
+  isTotal      Boolean?
+  copiaPara    String[]
+  tasklogs     TaskLog[]
+  user         User?        @relation(fields: [userID], references: [id])
+
+  @@map("tasks")
+}
+
+model TaskLog {
+  id          String     @id @default(uuid())
+  taskID      String
+  createdAt   DateTime   @default(now())
+  status      TaskStatus
+  description String?
+  task        Task       @relation(fields: [taskID], references: [id])
+
+  @@map("taskLogs")
+}
+
+model Escola {
+  id            Int               @id @default(autoincrement())
+  nome          String            @unique
+  createdAt     DateTime          @default(now()) @map("created_at")
+  carencias     CarenciaDocente[]
+  gradeHorarios GradeHorario[]
+  turmas        Turma[]
+
+  @@map("escolas")
+}
+
+model Turma {
+  id            String         @id @default(uuid())
+  escolaId      Int            @map("escola_id")
+  codigoTurma   String         @map("codigo_turma")
+  idEcidade     Int?           @unique @map("id_ecidade")
+  turno         Turno
+  gradeHorarios GradeHorario[]
+  escola        Escola         @relation(fields: [escolaId], references: [id])
+
+  @@map("turmas")
+}
+
+model Disciplina {
+  id            String         @id @default(uuid())
+  sigla         String         @unique
+  nomeCompleto  String?        @map("nome_completo")
+  corHex        String         @map("cor_hex")
+  gradeHorarios GradeHorario[]
+  professores   Professor[]
+
+  @@map("disciplinas")
+}
+
+model Professor {
+  matricula        String         @id
+  nome             String
+  cargaHoraria     Int
+  disciplinaId     String         @map("disciplina_id")
+  gradesTitular    GradeHorario[] @relation("Titular")
+  gradesSubstituto GradeHorario[] @relation("Substituto")
+  disciplina       Disciplina     @relation(fields: [disciplinaId], references: [id])
+
+  @@map("professores")
+}
+
+model GradeHorario {
+  id                  String        @id @default(uuid())
+  turmaId             String        @map("turma_id")
+  professorMatricula  String?       @map("professor_matricula")
+  disciplinaId        String        @map("disciplina_id")
+  diaSemana           DiaSemana     @map("dia_semana")
+  tempo               Int
+  tipoVinculo         TipoVinculo   @default(PRINCIPAL) @map("tipo_vinculo")
+  atualizadoEm        DateTime      @updatedAt @map("atualizado_em")
+  escolaId            Int           @map("escola_id")
+  substitutoMatricula String?       @map("substituto_matricula")
+  tipoCarencia        TipoCarencia? @map("tipo_carencia")
+  disciplina          Disciplina    @relation(fields: [disciplinaId], references: [id])
+  escola              Escola        @relation(fields: [escolaId], references: [id])
+  professor           Professor?    @relation("Titular", fields: [professorMatricula], references: [matricula])
+  substituto          Professor?    @relation("Substituto", fields: [substitutoMatricula], references: [matricula])
+  turma               Turma         @relation(fields: [turmaId], references: [id])
+
+  @@unique([turmaId, diaSemana, tempo])
+  @@map("grade_horario")
+}
+
+model CarenciaDocente {
+  id                 String       @id @default(uuid())
+  escolaId           Int          @map("escola_id")
+  disciplina         String
+  turno              String
+  diaSemana          Int
+  horarioTempo       Int
+  turma              Int?
+  tipo               TipoCarencia @default(REAL)
+  professorCobertura String?
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+  escola             Escola       @relation(fields: [escolaId], references: [id])
+
+  @@unique([escolaId, disciplina, turno, diaSemana, horarioTempo])
+  @@map("carencias_docentes")
+}
+
+model CargosEcidade {
+  id    String @id @default(uuid())
+  value Int
+  cargo String
+
+  @@map("Cargos_ecidade")
+}
+
+enum UserRole {
+  user
+  admin
 }
 
 enum TaskPriority {
@@ -62,163 +190,6 @@ enum TaskType {
   Movimentacao
   Admissao
 }
-
-model Task {
-  id String @id @default(uuid())
-
-  servidor     String
-  matricula    Int
-  entrada      String
-  emailEntrada String
-
-  copiaPara    String[]
-
-  saida        String?
-  isTotal      Boolean?
-  //carga
-  emailSaida   String?
-  cargo        String
-  funcao       String
-  cargaHoraria String
-  inicio       String
-  expedicao    String
-  isMemorando  Boolean
-  number       Int?
-
-  tipo        TaskType
-  description String?
-
-  enviado Boolean @default(false)
-
-  status   TaskStatus   @default(Pendente)
-  priority TaskPriority
-
-  userID String?
-  user   User?   @relation(fields: [userID], references: [id])
-
-  tasklogs TaskLog[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("tasks")
-}
-
-model TaskLog {
-  id          String     @id @default(uuid())
-  status      TaskStatus
-  description String?
-
-  taskID String
-  task   Task   @relation(fields: [taskID], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@map("taskLogs")
-}
-
-// Schema para Carências
-
-model Escola {
-  id   Int    @id @default(autoincrement())
-  nome String @unique
-
-  turmas    Turma[]
-  carencias CarenciaDocente[]
-  gradeHorarios GradeHorario[]
-
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@map("escolas")
-}
-
-model Turma {
-  id            String         @id @default(uuid())
-  escolaId      Int            @map("escola_id")
-  escola        Escola         @relation(fields: [escolaId], references: [id])
-  codigoTurma   String         @map("codigo_turma")
-  idEcidade     Int?           @unique @map("id_ecidade")
-  turno         Turno
-  gradeHorarios GradeHorario[]
-
-  @@map("turmas")
-}
-
-model Disciplina {
-  id            String         @id @default(uuid())
-  sigla         String         @unique
-  nomeCompleto  String?        @map("nome_completo")
-  corHex        String         @map("cor_hex")
-  gradeHorarios GradeHorario[]
-  professores   Professor[]
-
-  @@map("disciplinas")
-}
-
-model Professor {
-  matricula     String         @id
-  nome          String
-  cargaHoraria  Int
-  disciplinaId  String         @map("disciplina_id")
-  disciplina    Disciplina     @relation(fields: [disciplinaId], references: [id])
-
-  gradesTitular    GradeHorario[] @relation("Titular")
-  gradesSubstituto GradeHorario[] @relation("Substituto")
-
-  @@map("professores")
-}
-
-model GradeHorario {
-  id      String @id @default(uuid())
-  turmaId String @map("turma_id")
-  turma   Turma  @relation(fields: [turmaId], references: [id])
-
-  escolaId Int    @map("escola_id")
-  escola   Escola @relation(fields: [escolaId], references: [id])
-
-  professorMatricula String?    @map("professor_matricula")
-  professor          Professor? @relation("Titular", fields: [professorMatricula], references: [matricula])
-
-  substitutoMatricula String?    @map("substituto_matricula")
-  substituto          Professor? @relation("Substituto", fields: [substitutoMatricula], references: [matricula])
-
-  disciplinaId String     @map("disciplina_id")
-  disciplina   Disciplina @relation(fields: [disciplinaId], references: [id])
-
-  diaSemana   DiaSemana   @map("dia_semana")
-  tempo       Int
-  tipoVinculo TipoVinculo @default(PRINCIPAL) @map("tipo_vinculo")
-
-  tipoCarencia TipoCarencia? @map("tipo_carencia")
-
-  atualizadoEm DateTime @updatedAt @map("atualizado_em")
-
-  @@unique([turmaId, diaSemana, tempo])
-  @@map("grade_horario")
-}
-
-model CarenciaDocente {
-  id       String @id @default(uuid())
-  escolaId Int    @map("escola_id")
-  escola   Escola @relation(fields: [escolaId], references: [id])
-
-  disciplina         String
-  turno              String
-  diaSemana          Int
-  horarioTempo       Int
-  turma              Int?
-  tipo               TipoCarencia @default(REAL)
-  professorCobertura String?
-
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@unique([escolaId, disciplina, turno, diaSemana, horarioTempo])
-  @@map("carencias_docentes")
-}
-
-// ==========================================
-// ENUMS
-// ==========================================
 
 enum Turno {
   MANHA
